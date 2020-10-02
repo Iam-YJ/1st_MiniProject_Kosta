@@ -76,11 +76,11 @@ public class EndView {
 	 * 단어 시험(전체 DB 참조)
 	 */
 	public static void wordTest(List<Word> list, int userNo) {
+		int run1 = 0;
+		run1 = 10 - run;
+		List<Integer> orderList = EndView.makeRandom(run1, list.size());
 
-		run = 10 - run;
-		List<Integer> orderList = EndView.makeRandom(run, list.size());
-
-		for (Integer i : orderList) {
+		for (int i = 0; i < run1; i++) {
 			System.out.println("문제" + count + "번");
 			System.out.println(list.get(i).getWordEng() + "의 뜻은?");
 			System.out.println(list.get(i).getWordKor());
@@ -101,7 +101,9 @@ public class EndView {
 
 			System.out.println();
 		}
+
 		System.out.println(score + "점 입니다");
+
 	}
 
 	/**
@@ -111,7 +113,7 @@ public class EndView {
 		count = 1;
 		while (true) {
 			run = random.nextInt(10) + 1;
-			if (run <= list.size()) {
+			if (run <= list.size() && run > 0) {
 				break;
 			}
 		}
@@ -147,9 +149,7 @@ public class EndView {
 	 * 단어시험용 랜덤 10개 뽑기
 	 */
 	public static List<Integer> makeRandom(int run, int size) {
-		System.out.println(size);
 		for (int i = 0; i < run; i++) {
-			System.out.println(number);
 			int number = random.nextInt(size);
 			if (!numList.contains(number)) {
 				numList.add(number);
@@ -159,56 +159,6 @@ public class EndView {
 		}
 
 		return numList;
-	}
-
-	/**
-	 * 단어 시험 (초, 중, 고)
-	 */
-	public static void wordTestByLevel(List<Word> list) {
-		count = 1;
-		run = random.nextInt(10);
-		String[] level = { "L", "M", "H" };
-		List<Integer> orderList = EndView.makeRandom(run, list.size());
-
-		for (int k = 0; k < level.length; k++) {
-			for (Integer i : orderList) {
-				for (int j = 0; score < 8; j++) {
-					System.out.println("문제" + count + "번");
-					System.out.println(list.get(i).getWordEng());
-					System.out.println(list.get(i).getWordKor());
-					System.out.print("답 :");
-					String answer = sc.nextLine();
-					System.out.println("레벨:" + level[k]);
-					WordController.getAnswerByLevel(list.get(i).getWordNo(), level[k], answer);
-
-					if (WordController.getAnswerByLevel(list.get(i).getWordNo(), level[k], answer)) {
-						System.out.println("정답입니다");
-						score++;
-					} else {
-						continue;
-					}
-					count++;
-					System.out.println();
-				}
-				System.out.println(score + "점 입니다");
-			}
-		}
-
-	}
-
-	/**
-	 * 단어 게임
-	 */
-	public static void wordGame(List<Word> list) {
-		// level 순으로 시험
-		// 8개 이상 맞으면 level up
-		// 3개 이상 틀리면 out
-
-		// 레벨 순으로 불러오는 메소드 호출 (만들고 arr [l, m, h] 하나씩 돌기)
-		// random 메소드 작성
-		// 답 개수 저장 + 오답 개수 저장
-		// 답 8개 이상이면 - > 다시
-
 	}
 
 }

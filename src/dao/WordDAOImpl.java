@@ -66,11 +66,11 @@ public class WordDAOImpl implements WordDAO {
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
+		String sql = "SELECT * FROM word WHERE word_eng LIKE '" + alphabet + "%' order by WORD_ENG asc";
 		List<Word> list = new ArrayList<>();
 		try {
 			con = DbUtil.getConnection();
-			ps = con.prepareStatement("select * from WORD order by CASE WHEN WORD_LEVEL LIKE ?% THEN WORD_ENG end asc");
-			ps.setString(1, alphabet);
+			ps = con.prepareStatement(sql);
 			rs = ps.executeQuery();
 
 			while (rs.next()) {

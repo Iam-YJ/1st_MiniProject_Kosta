@@ -94,7 +94,7 @@ public class MenuView {
 	public static void printNonUserMenu() { // 비회원 메뉴
 		while (true) {
 			SessionSet ss = SessionSet.getInstance();
-			System.out.println("-----" + "비회원" + " 로그인 중 -----"); // 이거 고치고 싶음 -- 유진
+			System.out.println("----- 비회원 로그인 중 -----");
 			System.out.println(" 1.전체검색 |  2.단어시험  ");
 			int menu = Integer.parseInt(sc.nextLine());
 			switch (menu) {
@@ -119,7 +119,7 @@ public class MenuView {
 	public static void printAdminMenu() { // 관리자 메뉴
 		while (true) {
 			SessionSet ss = SessionSet.getInstance();
-			// System.out.println("---" + "관리자" + "");
+			// System.out.println("----- 관리자 로그인 중 -----);
 			System.out.println("1. 단어 추가 | 2. 단어 삭제 | 3. 회원 수정 | 4. 회원 삭제");
 			int menu = Integer.parseInt(sc.nextLine());
 			switch (menu) {
@@ -174,7 +174,7 @@ public class MenuView {
 	 */
 	public static void printInputAdminWord() {
 
-		System.out.print("추가할 단어 레벨");
+		System.out.print("추가할 단어 레벨(H,M,L)");
 		String wordLevel = sc.nextLine();
 
 		System.out.print("단어(영문) : ");
@@ -214,7 +214,7 @@ public class MenuView {
 	 */
 	public static void printAllWord() {
 		System.out.println("어떤 방식으로 단어를 출력할까요? ");
-		System.out.println("1. 전체 검색 | 2. 단어로 검색 | 3. 알파벳으로 검색)");
+		System.out.println("1. 전체 검색 | 2. 단어로 검색 | 3. 알파벳으로 검색");
 		int menu = Integer.parseInt(sc.nextLine());
 		switch (menu) {
 		case 1:
@@ -233,7 +233,7 @@ public class MenuView {
 			System.out.println("검색할 알파벳을 입력하세요 ");
 			String alphabet = sc.nextLine();
 			System.out.println("===== 알파벳으로 검색 합니다 =====");
-			WordController.wordSelectByAlphabet(alphabet.toLowerCase());
+			WordController.wordSelectByAlphabet(alphabet);
 			return;
 
 		default:
@@ -248,7 +248,7 @@ public class MenuView {
 	public static void wordTest(int userNo) {
 		WordDAO wd = new WordDAOImpl();
 		UserWordDAO uwd = new UserWordDAOImpl();
-		System.out.println("단어 시험 & 게임을 시작합니다. ");
+		System.out.println("단어 시험을 시작합니다. ");
 		System.out.println("1. 랜덤 단어 시험 ");
 		int menu = Integer.parseInt(sc.nextLine());
 		switch (menu) {
@@ -256,7 +256,7 @@ public class MenuView {
 			System.out.println("======= 랜덤 단어 시험을 시작합니다 =====");
 			try {
 				if (userNo != 0) {
-					//EndView.userWordTest(uwd.selectMemberWord(userNo));
+					EndView.userWordTest(uwd.selectMemberWord(userNo));
 				}
 				 EndView.wordTest(wd.wordSelect(), userNo);
 
