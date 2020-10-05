@@ -40,18 +40,61 @@ public class WordDAOImpl implements WordDAO {
 	}
 
 	@Override
-	public List<Word> wordSelectByWord(String eng) throws SQLException { // 특정단어 검색
+	public List<Word> wordSelectByUserNo(int userNo) throws SQLException { // 개인 단어 검색
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		List<Word> list = new ArrayList<>();
 		try {
 			con = DbUtil.getConnection();
-			ps = con.prepareStatement("select*from WORD where WORD_ENG = ? order by WORD_ENG asc");
-			ps.setString(1, eng);
+			ps = con.prepareStatement("select*from USER_WORD WHERE user_no = " + userNo + " order by USER_WORD_NO asc");
 			rs = ps.executeQuery();
 
-			if (rs.next()) {
+			while (rs.next()) {
+				Word word = new Word(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5));
+				list.add(word);
+			}
+		} finally {
+			DbUtil.close(con, ps, rs);
+		}
+		return list;
+	}
+
+	@Override
+	public List<Word> wordSelectByWord(String eng) throws SQLException { // 영단어 검색
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		List<Word> list = new ArrayList<>();
+		try {
+			con = DbUtil.getConnection();
+			ps = con.prepareStatement("select*from WORD where WORD_ENG LIKE ? order by WORD_ENG asc");
+			ps.setString(1, "%" + eng + "%");
+			rs = ps.executeQuery();
+
+			while(rs.next()) {
+				Word word = new Word(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5));
+				list.add(word);
+			}
+		} finally {
+			DbUtil.close(con, ps, rs);
+		}
+		return list;
+	}
+
+	@Override
+	public List<Word> wordSelectByWordKor(String kor) throws SQLException { // 한글 검색
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		List<Word> list = new ArrayList<>();
+		try {
+			con = DbUtil.getConnection();
+			ps = con.prepareStatement("select*from WORD where WORD_KOR LIKE ? order by WORD_KOR asc");
+			ps.setString(1, "%" + kor + "%");
+			rs = ps.executeQuery();
+
+			while(rs.next()) {
 				Word word = new Word(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5));
 				list.add(word);
 			}
@@ -254,14 +297,31 @@ public class WordDAOImpl implements WordDAO {
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		String sql = "select*from WORD where word_no =? ";
 		List<Word> list = new ArrayList<>();
 		List<String> noList = new ArrayList<String>();
+		noList = tdao.testSelectByUserNo(userNo);
 		try {
 			con = DbUtil.getConnection();
-			ps = con.prepareStatement(sql);
+			ps = con.prepareStatement("select*from USER_WORD where user_word_no =? ");
 
-			noList = tdao.testSelectByUserNo(userNo);
+			for (String s : noList) {
+				ps.setInt(1, Integer.parseInt(s));
+				rs = ps.executeQuery();
+
+				while (rs.next()) {
+					Word word = new Word(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4),
+							rs.getString(5));
+					list.add(word);
+				}
+
+			}
+
+		} finally {
+			DbUtil.close(con, ps, rs);
+		}
+		try {
+			con = DbUtil.getConnection();
+			ps = con.prepareStatement("select*from WORD where word_no =? ");
 
 			for (String s : noList) {
 				ps.setInt(1, Integer.parseInt(s));
@@ -279,6 +339,19 @@ public class WordDAOImpl implements WordDAO {
 			DbUtil.close(con, ps, rs);
 		}
 		return list;
+	}
+	
+	@Override
+	public void wordResetByUserNo(int userNo) throws SQLException {
+		Connection con = null;
+		PreparedStatement ps = null;
+		try {
+			con = DbUtil.getConnection();
+			ps = con.prepareStatement("delete from test where user_no = " + userNo);
+			ps.executeUpdate();
+		} finally {
+			DbUtil.dbClose(con, ps);
+		}
 	}
 
 }

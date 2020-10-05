@@ -71,14 +71,10 @@ public class MemberDAOImpl implements MemberDAO {
 	}
 
 	@Override
-	public Member register(String userId, String password, String nickName) throws SQLException {
+	public void register(String userId, String password, String nickName) throws SQLException {
 		Connection con = null;
 		PreparedStatement ps = null;
-		int i = 0;
-		Member member = null;
-
-		String sql = "insert into member(user_no,user_id, password, nickname,points) values(USER_NO_SEQ.nextval,?,?,?,null)";
-
+		String sql = "insert into member(user_no, user_id, password, nickname,points) values(USER_NO_SEQ.nextval,?,?,?,0)";
 		try {
 			con = DbUtil.getConnection();
 			ps = con.prepareStatement(sql);
@@ -86,20 +82,17 @@ public class MemberDAOImpl implements MemberDAO {
 			ps.setString(1, userId);
 			ps.setString(2, password);
 			ps.setString(3, nickName);
-			i = ps.executeUpdate();
-
+			ps.executeUpdate();
 		} finally {
 			DbUtil.dbClose(con, ps);
 		}
-
-		return member;
 	}
 
 	@Override
 	public int update(Member member) throws SQLException {
 		Connection con = null;
 		PreparedStatement ps = null;
-		String sql = "update member set password = ?, nickName =? where user_No=?";
+		String sql = "update member set password = ?, nickName = ?, points = ? where user_No=?";
 		int result = 0;
 
 		try {
@@ -108,7 +101,8 @@ public class MemberDAOImpl implements MemberDAO {
 
 			ps.setString(1, member.getPassword());
 			ps.setString(2, member.getNickName());
-			ps.setInt(3, member.getUserNo());
+			ps.setInt(3, member.getPoints());
+			ps.setInt(4, member.getUserNo());
 
 			result = ps.executeUpdate();
 		} finally {
@@ -169,6 +163,7 @@ public class MemberDAOImpl implements MemberDAO {
 
 		Connection con = null;
 		PreparedStatement ps = null;
+		ResultSet rs = null;
 		String sql = "select points from member where user_no = ?";
 
 		try {
@@ -177,7 +172,8 @@ public class MemberDAOImpl implements MemberDAO {
 
 			ps.setInt(1, userNo);
 
-			point = ps.executeUpdate();
+			rs = ps.executeQuery();
+			if (rs.next()) point = rs.getInt(1);
 
 		} catch (SQLException e) {
 			e.printStackTrace();

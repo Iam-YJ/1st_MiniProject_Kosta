@@ -1,18 +1,13 @@
 
 package service;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import dao.WordDAO;
 import dao.WordDAOImpl;
 import dto.Word;
-import exception.NotFoundException;
-import util.DbUtil;
+import gui.GUIMainView;
 
 public class WordService {
 	static WordDAO wd = new WordDAOImpl();
@@ -21,9 +16,10 @@ public class WordService {
 	 * 단어 추가 
 	 * */
 	public void wordInsert(Word word) throws SQLException {
-		int result = wd.wordInsert(word);
-		if (result == 0)
-			throw new SQLException("등록되지 않았습니다..");
+		if (wd.wordInsert(word) > 0) {
+			GUIMainView.appendConsoleField("____________________________________________________________________________________\n\n단어 \"" + word.getWordEng() + "\"  /  \"" + word.getWordKor() + "\" 가  추가되었습니다.");
+		}
+		else throw new SQLException("등록되지 않았습니다..");
 
 	}
 	/**
@@ -31,10 +27,12 @@ public class WordService {
 	 */
 	public void wordDelete(Word word) throws SQLException {
 		int result = wd.wordDelete(word);
-		if (result == 0)
-			throw new SQLException("삭제되지 않았습니다..");
+		if (result > 0) {
+			GUIMainView.appendConsoleField("____________________________________________________________________________________\n\n단어 \"" + word.getWordEng() + "\" 가 " + result + "개 삭제되었습니다.");
+		}
+		else throw new SQLException("삭제되지 않았습니다..");
 	}
-	
+
 	
 	/**
 	 * 단어 검색 (전체 단어 순회)
@@ -42,7 +40,7 @@ public class WordService {
 	public List<Word> wordSelect() throws SQLException	{ //전체단어 검색
 		List<Word> list = wd.wordSelect();
 		if (list.size() == 0 || list == null) {
-			throw new SQLException("단어장을 불러오지 못했습니다");
+			throw new SQLException("일치하는 단어가 없습니다");
 		}
 		return list;
 	}
@@ -53,7 +51,18 @@ public class WordService {
 	public List<Word> wordSelectByWord(String eng) throws SQLException { //특정단어 검색
 		List<Word> list = wd.wordSelectByWord(eng);
 		if (list.size() == 0 || list == null) {
-			throw new SQLException("단어장을 불러오지 못했습니다");
+			throw new SQLException("일치하는 단어가 없습니다");
+		}
+		return list;
+	}
+
+	/**
+	 * 단어 검색 (한글로 검색 )
+	 */
+	public List<Word> wordSelectByWordKor(String kor) throws SQLException { //특정단어 검색
+		List<Word> list = wd.wordSelectByWordKor(kor);
+		if (list.size() == 0 || list == null) {
+			throw new SQLException("일치하는 단어가 없습니다");
 		}
 		return list;
 	}
@@ -64,7 +73,18 @@ public class WordService {
 	public List<Word> wordSelectByAlphabet(String alphabet) throws SQLException { //알파벳검색
 		List<Word> list = wd.wordSelectByAlphabet(alphabet);
 		if (list.size() == 0 || list == null) {
-			throw new SQLException("단어장을 불러오지 못했습니다");
+			throw new SQLException("일치하는 단어가 없습니다");
+		}
+		return list;
+	}
+	
+	/**
+	 * 단어 검색 (개인 단어장)
+	 */
+	public List<Word> selectUserWord(int userNo) throws SQLException	{ //전체단어 검색
+		List<Word> list = wd.wordSelectByUserNo(userNo);
+		if (list.size() == 0 || list == null) {
+			throw new SQLException("일치하는 단어가 없습니다");
 		}
 		return list;
 	}
@@ -100,9 +120,16 @@ public class WordService {
 		List<Word> list = wd.wordSelectByWordNo(userNo);
 		
 		if (list.size() == 0 || list == null) {
-			throw new SQLException("단어장을 불러오지 못했습니다");
+			throw new SQLException("일치하는 단어가 없습니다");
 		}
 		return list;
+	}
+	
+	/**
+	 * 오답 노트 초기화
+	 */
+	public static void wordResetByUserNo(int userNo) throws SQLException {
+		wd.wordResetByUserNo(userNo);
 	}
 }
 

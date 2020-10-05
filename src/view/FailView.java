@@ -1,6 +1,6 @@
 package view;
 
-import java.util.Scanner;
+import gui.GUIMainView;
 
 public class FailView {
 	
@@ -8,7 +8,7 @@ public class FailView {
 	 * 예외가 발생했을때 예외메세지 출력
 	 */
 	public static void errorMessage(String message){
-		System.out.println(message);
+		GUIMainView.appendConsoleField(message);
 	}
 	
 }

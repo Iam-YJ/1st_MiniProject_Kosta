@@ -1,20 +1,15 @@
 package service;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
 import dao.MemberDAO;
 import dao.MemberDAOImpl;
 import dto.Member;
-import dto.Word;
 import exception.DuplicatedException;
 import exception.NotFoundException;
 import session.Session;
 import session.SessionSet;
-import util.DbUtil;
 
 public class MemberService {
 	static MemberDAO mdao = new MemberDAOImpl();
@@ -33,17 +28,17 @@ public class MemberService {
 
 	}
 
-	public static Member register(String userId, String password, String nickName)
+	public static boolean register(String userId, String password, String nickName)
 			throws SQLException, DuplicatedException {
-		Member member = mdao.register(userId, password, nickName);
-
-		if (member != null) {
-			throw new DuplicatedException("이미 존재하는 회원입니다.");
+		try {
+			mdao.register(userId, password, nickName);
+			SessionSet sessionSet = SessionSet.getInstance();
+			Session session = new Session(userId);
+			sessionSet.add(session);
+		} catch (SQLException e) {
+			throw new SQLException ("이미 존재하는 아이디입니다.");
 		}
-		SessionSet sessionSet = SessionSet.getInstance();
-		Session session = new Session(userId);
-		sessionSet.add(session);
-		return member;
+		return true;
 	}
 
 	/**

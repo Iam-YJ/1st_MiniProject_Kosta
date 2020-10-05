@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import dto.Member;
-import dto.Word;
 
 public interface MemberDAO {
 
@@ -16,7 +15,7 @@ public interface MemberDAO {
 	/**
 	 * 회원가입하기
 	 */
-	Member register(String userId, String password, String nickName) throws SQLException;
+	void register(String userId, String password, String nickName) throws SQLException;
 
 	/**
 	 * 관리자 - 회원 수정

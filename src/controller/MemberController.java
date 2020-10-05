@@ -3,8 +3,9 @@ package controller;
 import java.sql.SQLException;
 import java.util.List;
 
+import dto.Admin;
 import dto.Member;
-import dto.Word;
+import gui.GUIMainView;
 import service.MemberService;
 import view.EndView;
 import view.FailView;
@@ -19,7 +20,11 @@ public class MemberController {
 	public static Member login(String userId, String password) {
 		try {
 			Member member = memberService.login(userId, password);
-			MenuView.printUserMenu(userId, member.getUserNo());
+
+    		if (Admin.getUserNo() == member.getUserNo())
+    			MenuView.printAdminMenu();
+    		else
+    			MenuView.printUserMenu(userId, member.getUserNo());
 			
 			return member;
 
@@ -33,12 +38,14 @@ public class MemberController {
 	/**
 	 * 회원가입
 	 */
-	public static void register(String userId, String password, String nickName) {
+	public static boolean register(String userId, String password, String nickName) {
 		try {
-			Member member = MemberService.register(userId, password, nickName);
-			MenuView.printUserMenu(userId, member.getUserNo());
+			MemberService.register(userId, password, nickName);
+//			MenuView.printUserMenu(userId, member.getUserNo());
+			return true;
 		} catch (Exception e) {
 			FailView.errorMessage(e.getMessage());
+			return false;
 		}
 	}
 
@@ -48,6 +55,7 @@ public class MemberController {
 	public static void memberUpdate(Member member) {
 		try {
 			memberService.update(member);
+			GUIMainView.appendConsoleField("____________________________________________________________________________________\n\n사용자 " + member.getUserNo() + ".  \"" + member.getNickName() + "\" 의 정보가 수정되었습니다.");
 		} catch (SQLException e) {
 			FailView.errorMessage(e.getMessage());
 		}
@@ -60,6 +68,7 @@ public class MemberController {
 	public static void memberDelete(Member member) {
 		try {
 			memberService.delete(member);
+			GUIMainView.appendConsoleField("____________________________________________________________________________________\n\n" + member.getUserNo() + " 번의 사용자 아이디가 삭제되었습니다.");
 		} catch (SQLException e) {
 			FailView.errorMessage(e.getMessage());
 		}

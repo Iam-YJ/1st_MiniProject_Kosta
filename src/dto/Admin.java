@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Admin {
-	private int userNo;
+	private static int userNo;
 	private static List<Member> adminList = new ArrayList<Member>();
 
 	public Admin() {
@@ -14,15 +14,15 @@ public class Admin {
 
 	public Admin(int userNo) {
 		super();
-		this.userNo = userNo;
+		Admin.userNo = userNo;
 	}
 
-	public int getUserNo() {
+	public static int getUserNo() {
 		return userNo;
 	}
 
 	public void setUserNo(int userNo) {
-		this.userNo = userNo;
+		Admin.userNo = userNo;
 	}
 
 	public static List<Member> getAdmin() {
@@ -34,6 +34,7 @@ public class Admin {
 	}
 	public static void addAdmin(Member member) {
 		adminList.add(member);
+		userNo = member.getUserNo();
 	}
 	
 	

@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import dto.Word;
+import gui.GUIMainView;
 import service.WordService;
 import view.EndView;
 import view.FailView;
@@ -19,7 +20,6 @@ public class WordController {
 	public static void wordInsert(Word word) {
 		try {
 			service.wordInsert(word);
-
 		} catch (SQLException e) {
 			FailView.errorMessage(e.getMessage());
 
@@ -48,9 +48,18 @@ public class WordController {
 		}
 	}
 
-	public static void wordSelectByWord(String eng) { // 특정단어 검색
+	public static void wordSelectByWord(String eng) { // 영단어 검색
 		try {
 			List<Word> list = service.wordSelectByWord(eng);
+			EndView.printWordList(list);
+		} catch (Exception e) {
+			FailView.errorMessage(e.getMessage());
+		}
+	}
+
+	public static void wordSelectByWordKor(String kor) { // 한글 검색
+		try {
+			List<Word> list = service.wordSelectByWordKor(kor);
 			EndView.printWordList(list);
 		} catch (Exception e) {
 			FailView.errorMessage(e.getMessage());
@@ -60,6 +69,15 @@ public class WordController {
 	public static void wordSelectByAlphabet(String alphabet) { // 알파벳검색
 		try {
 			List<Word> list = service.wordSelectByAlphabet(alphabet);
+			EndView.printWordList(list);
+		} catch (Exception e) {
+			FailView.errorMessage(e.getMessage());
+		}
+	}
+
+	public static void wordSelectByUser(int userNo) { // 전체단어 검색
+		try {
+			List<Word> list = service.selectUserWord(userNo);
 			EndView.printWordList(list);
 		} catch (Exception e) {
 			FailView.errorMessage(e.getMessage());
@@ -99,6 +117,16 @@ public class WordController {
 		} catch (Exception e) {
 			FailView.errorMessage(e.getMessage());
 		}
+	}
+
+	public static void resetTestNote(int userNo) {
+		try {
+			service.wordResetByUserNo(userNo);
+			GUIMainView.appendConsoleField("오답 노트를 초기화 하였습니다.");
+		} catch (Exception e) {
+			FailView.errorMessage(e.getMessage());
+		}
+		
 	}
 
 }

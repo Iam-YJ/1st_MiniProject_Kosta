@@ -4,7 +4,6 @@ package dao;
 import java.sql.SQLException;
 import java.util.List;
 
-import dto.UserWord;
 import dto.Word;
 
 public interface WordDAO {
@@ -53,6 +52,21 @@ public interface WordDAO {
 	 * 단어 불러오기 (단어 넘버로)
 	 */
 	public List<Word> wordSelectByWordNo(int userNo) throws SQLException;
+
+	/**
+	 * 검색 기능 (한글)
+	 */
+	public List<Word> wordSelectByWordKor(String kor) throws SQLException;
+
+	/**
+	 * 검색 기능 (개인 단어)
+	 */
+	public List<Word> wordSelectByUserNo(int userNo) throws SQLException;
+
+	/**
+	 * 오답 노트 초기화
+	 */
+	public void wordResetByUserNo(int userNo) throws SQLException;
 
 
 }

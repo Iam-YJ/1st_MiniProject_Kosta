@@ -1,7 +1,6 @@
 package view;
 
 import java.sql.SQLException;
-import java.util.Scanner;
 
 import controller.MemberController;
 import controller.UserWordController;
@@ -13,157 +12,79 @@ import dao.WordDAOImpl;
 import dto.Member;
 import dto.UserWord;
 import dto.Word;
-import session.Session;
+import gui.GUIMainView;
 import session.SessionSet;
 
 //연속적으로 안돌아감 
 public class MenuView {
-	//git test
-	private static Scanner sc = new Scanner(System.in);
-
-	public static void menu() { // 첫 화면
-		while (true) {
-			SessionSet ss = SessionSet.getInstance();
-			MenuView.printMenu();
-			int menu = Integer.parseInt(sc.nextLine());
-			switch (menu) {
-			case 1:
-				MenuView.register(); // 가입
-
-				break;
-			case 2:
-				MenuView.login(); // 로그인
-				break;
-
-			case 3:
-				MenuView.printAdminMenu();
-				break;
-
-			case 9:
-				System.exit(0);
-			}
-		}
-	}
-
+	public static int CurrentMenu = 0;
 	public static void printUserMenu(String userId, int userNo) { // 회원 메뉴
-		while (true) {
-			SessionSet ss = SessionSet.getInstance();
-			System.out.println("-----" + userId + " 로그인 중 -----");
-			System.out.println("1.전체검색  |  2.단어시험  | 3. 단어추가  |  4.단어삭제  |  5.오답노트  | 6. 랭킹  | 7. 로그아웃");
-			int menu = Integer.parseInt(sc.nextLine());
-			switch (menu) {
-			case 1:
-				MenuView.printAllWord();
-				UserWordController.selectMemberWord(userNo);
-				return;
-
-			case 2:
-				// 단어시험
-				MenuView.wordTest(userNo);
-				return;
-			case 3:
-				// 단어추가
-				MenuView.printInputWord(userNo);
-				return;
-			case 4:
-				// 단어삭제
-				MenuView.printDeleteWord(userNo);
-				return;
-			case 5:
-				// 오답노트
-				WordController.wordSelectByWordNo(userNo);
-				return;
-
-			case 6:
-				// 랭킹
-				MemberController.rank();
-				return;
-
-			case 7:
-				MenuView.logout(userId);
-				return;
-			default:
-				System.out.println("잘못된 입력입니다.");
-				break;
-
-			}
-		}
-
+		CurrentMenu = 1;
+		SessionSet ss = SessionSet.getInstance();
+		GUIMainView.setConsoleField("-----" + userId + " 로그인 중 -----");
+		GUIMainView.appendConsoleField("1. 단어 검색  |  2. 단어 시험  | 3. 개인 단어 추가  |  4. 개인 단어 삭제  |  5. 오답 노트  |  6. 오답 노트 초기화  |  7. 랭킹");
 	}
 
 	public static void printNonUserMenu() { // 비회원 메뉴
-		while (true) {
-			SessionSet ss = SessionSet.getInstance();
-			System.out.println("----- 비회원 로그인 중 -----");
-			System.out.println(" 1.전체검색 |  2.단어시험  ");
-			int menu = Integer.parseInt(sc.nextLine());
-			switch (menu) {
-			case 1:
-				// 전체검색
-				MenuView.printAllWord();
-				return;
-
-			case 2:
-				// 단어시험
-				MenuView.wordTest(0);
-				return;
-			// break;
-			default:
-				System.out.println("잘못된 입력입니다.");
-				break;
-			}
-		}
-
+		CurrentMenu = 80;
+		SessionSet ss = SessionSet.getInstance();
+		GUIMainView.setConsoleField("----- Guest 로그인 중 -----");
+		GUIMainView.appendConsoleField(" 1. 단어 검색  |  2.단어 시험");
 	}
 
 	public static void printAdminMenu() { // 관리자 메뉴
-		while (true) {
+		CurrentMenu = 90;
 			SessionSet ss = SessionSet.getInstance();
-			// System.out.println("----- 관리자 로그인 중 -----);
-			System.out.println("1. 단어 추가 | 2. 단어 삭제 | 3. 회원 수정 | 4. 회원 삭제");
-			int menu = Integer.parseInt(sc.nextLine());
-			switch (menu) {
-			case 1:
-				MenuView.printInputAdminWord();
-				return;
-
-			case 2:
-				MenuView.printDeleteAdminWord();
-				return;
-
-			case 3:
-
-				MenuView.printUpdateAdminMember();
-				return;
-
-			case 4:
-
-				MenuView.printDeleteAdminMember();
-				return;
-
-			}
-		}
-
+			GUIMainView.setConsoleField("----- Administrator 로그인 중 -----");
+			GUIMainView.appendConsoleField("1. 단어 추가  |  2. 단어 삭제  |  3. 회원 목록  |  4. 회원 수정  |  5. 회원 삭제");
 	}
 
-	private static void printUpdateAdminMember() {
-		System.out.println("수정 할 회원번호? ");
-		int userNo = Integer.parseInt(sc.nextLine());
+	public static void printUpdateAdminMember() {
+		GUIMainView.setConsoleField("======= 회원 수정 =====\n\n____________________________________________________________________________________\n\n");
+		GUIMainView.appendConsoleField("수정 할 대상의 회원 번호");
+		String userStrNo = GUIMainView.getInputDialog("수정 할 회원 번호", "회원 번호 입력");
+		while (userStrNo.length() == 0 || !userStrNo.matches("^[0-9]*$")) {
+			GUIMainView.appendConsoleField("숫자만 입력 가능합니다.");
+			userStrNo = GUIMainView.getInputDialog("수정 할 회원 번호", "회원 번호 입력");
+		}
+		int userNo = Integer.parseInt(userStrNo);
 
-		System.out.println("수정 비밀번호는?");
-		String password = sc.nextLine();
+		GUIMainView.appendConsoleField("\n새 비밀번호");
+		String password = GUIMainView.getInputDialog("새 비밀번호", "새 비밀번호 입력");
+		while(password.length() < 4) {
+			GUIMainView.appendConsoleField("비밀번호는 최소 4자 이상이여야 합니다.");
+			password = GUIMainView.getInputDialog("새 비밀번호", "새 비밀번호 입력");
+		}
 
-		System.out.println("수정 이름은?");
-		String nickName = sc.nextLine();
-
-		Member member = new Member(userNo, null, password, nickName);
+		GUIMainView.appendConsoleField("\n새 닉네임");
+		String nickName = GUIMainView.getInputDialog("새 닉네임", "새 닉네임 입력");
+		while(nickName.length() < 3) {
+			GUIMainView.appendConsoleField("닉네임은 최소 3자 이상이여야 합니다.");
+			password = GUIMainView.getInputDialog("새 닉네임", "새 닉네임 입력");
+		}
+		
+		GUIMainView.appendConsoleField("포인트 값 수정");
+		userStrNo = GUIMainView.getInputDialog("포인트 값 수정", "포인트 값 입력");
+		while (userStrNo.length() == 0 || !userStrNo.matches("^[0-9]*$")) {
+			GUIMainView.appendConsoleField("숫자만 입력 가능합니다.");
+			userStrNo = GUIMainView.getInputDialog("포인트 값 수정", "포인트 값 입력");
+		}
+		int points = Integer.parseInt(userStrNo);
+		
+		Member member = new Member(userNo, null, password, nickName, points);
 		MemberController.memberUpdate(member);
 	}
 
-	private static void printDeleteAdminMember() {
-		System.out.println("삭제할 회원번호? ");
-		int userNo = Integer.parseInt(sc.nextLine());
-
+	public static void printDeleteAdminMember() {
+		GUIMainView.setConsoleField("======= 회원 삭제 =====\n\n____________________________________________________________________________________\n\n");
+		GUIMainView.appendConsoleField("삭제 될 회원 번호");
+		String userStrNo = GUIMainView.getInputDialog("삭제 될 회원 번호", "회원 번호 입력");
+		while (userStrNo.length() == 0 || !userStrNo.matches("^[0-9]*$")) {
+			GUIMainView.appendConsoleField("숫자만 입력 가능합니다.");
+			userStrNo = GUIMainView.getInputDialog("삭제 될 회원 번호", "회원 번호 입력");
+		}
+		int userNo = Integer.parseInt(userStrNo);
+		
 		Member member = new Member(userNo);
 		MemberController.memberDelete(member);
 
@@ -173,20 +94,36 @@ public class MenuView {
 	 * 관리자 단어 추가
 	 */
 	public static void printInputAdminWord() {
+		GUIMainView.setConsoleField("======= 단어 추가 =====\n\n____________________________________________________________________________________\n\n");
+		GUIMainView.appendConsoleField("단어 레벨");
+		String wordLev = GUIMainView.getInputDialog("추가할 단어 레벨", "L    (Low)\nM  (Medium)\nH   (High)");
+		while (wordLev.length() != 1 || !"LMH".contains(wordLev.toUpperCase())) {
+			GUIMainView.appendConsoleField("L  M  H 중에 입력하세요.");
+			wordLev = GUIMainView.getInputDialog("추가할 단어 레벨", "L    (Low)\nM  (Medium)\nH   (High)");
+		}
 
-		System.out.print("추가할 단어 레벨(H,M,L)");
-		String wordLevel = sc.nextLine();
+		GUIMainView.appendConsoleField("\n영단어");
+		String wordEng = GUIMainView.getInputDialog("추가할 영단어", "영단어 입력");
+		while(wordEng.length() == 0 || !wordEng.matches("^[a-zA-Z]*$")) {
+			GUIMainView.appendConsoleField("알파벳만 입력 가능합니다.");
+			wordEng = GUIMainView.getInputDialog("추가할 영단어", "영단어 입력");
+		}
 
-		System.out.print("단어(영문) : ");
-		String wordEng = sc.nextLine();
+		GUIMainView.appendConsoleField("\n한글 뜻");
+		String wordKor = GUIMainView.getInputDialog("추가할 한글 뜻", "한글 뜻 입력");
+		while (wordKor.length() == 0 || wordKor.matches("^[a-zA-Z0-9]*$")) {
+			GUIMainView.appendConsoleField("영문과 숫자는 입력할 수 없습니다");
+			wordKor = GUIMainView.getInputDialog("추가할 한글 뜻", "한글 뜻 입력");
+		}
 
-		System.out.print("단어(한글) : ");
-		String wordKor = sc.nextLine();
+		GUIMainView.appendConsoleField("\n품사");
+		String wordPart = GUIMainView.getInputDialog("품사", "품사 입력");
+		while (wordPart.length() == 0 || !wordPart.matches("^[a-z]*$")) {
+			GUIMainView.appendConsoleField("영어 소문자만 입력 가능합니다");
+			wordPart = GUIMainView.getInputDialog("품사", "품사 입력");
+		}
 
-		System.out.print("품사 : ");
-		String wordPart = sc.nextLine();
-
-		Word word = new Word(wordLevel, wordEng, wordKor, wordPart);
+		Word word = new Word(wordLev, wordEng, wordKor, wordPart);
 		WordController.wordInsert(word);
 	}
 	
@@ -196,155 +133,87 @@ public class MenuView {
 	 */
 
 	public static void printDeleteAdminWord() {
-
-		System.out.print("삭제할 단어(영문) : ");
-		String wordEng = sc.nextLine();
+		GUIMainView.setConsoleField("======= 단어 삭제 =====\n\n____________________________________________________________________________________\n\n");
+		GUIMainView.appendConsoleField("영단어");
+		String wordEng = GUIMainView.getInputDialog("삭제할 영단어", "영단어 입력");
+		while(wordEng.length() == 0 || !wordEng.matches("^[a-zA-Z]*$")) {
+			GUIMainView.appendConsoleField("알파벳만 입력 가능합니다.");
+			wordEng = GUIMainView.getInputDialog("삭제할 영단어", "영단어 입력");
+		}
 
 		Word word = new Word(wordEng);
 		WordController.wordDelete(word);
-	}
-
-	public static void printMenu() { // 입장 메뉴
-		System.out.println("=== 잊혀질 단어장 3조 ===");
-		System.out.println("1. 가입   |   2. 로그인 | 3. 관리자 |  9. 종료");
 	}
 
 	/**
 	 * 전체 단어 검색 메뉴 (전체 순회 / 단어로 찾기 / 알파벳으로 찾기)
 	 */
 	public static void printAllWord() {
-		System.out.println("어떤 방식으로 단어를 출력할까요? ");
-		System.out.println("1. 전체 검색 | 2. 단어로 검색 | 3. 알파벳으로 검색");
-		int menu = Integer.parseInt(sc.nextLine());
-		switch (menu) {
-		case 1:
-			System.out.println("===== 전체 검색 합니다 =====");
-			WordController.wordSelect();
-			return;
+		GUIMainView.setConsoleField("어떤 방식으로 단어를 검색할까요? ");
+		GUIMainView.appendConsoleField("1. 전체 검색 | 2. 단어 검색 | 3. 알파벳 검색 | 4. 한글 검색 | 5. 개인 단어 검색");
+	}
 
-		case 2:
-			System.out.println("검색할 단어를 입력하세요 ");
-			String word = sc.nextLine();
-			System.out.println("===== 단어로 검색 합니다 =====");
-			WordController.wordSelectByWord(word.toLowerCase());
-			return;
-
-		case 3:
-			System.out.println("검색할 알파벳을 입력하세요 ");
-			String alphabet = sc.nextLine();
-			System.out.println("===== 알파벳으로 검색 합니다 =====");
-			WordController.wordSelectByAlphabet(alphabet);
-			return;
-
-		default:
-			System.out.println("잘못된 입력입니다.");
-			break;
-		}
+	/**
+	 * 전체 단어 검색 메뉴 (전체 순회 / 단어로 찾기 / 알파벳으로 찾기) - Guest
+	 */
+	public static void printAllWordGuest() {
+		GUIMainView.setConsoleField("어떤 방식으로 단어를 검색할까요? ");
+		GUIMainView.appendConsoleField("1. 전체 검색 | 2. 단어 검색 | 3. 알파벳 검색 | 4. 한글 검색");
 	}
 
 	/**
 	 * 단어 시험 & 게임
 	 */
 	public static void wordTest(int userNo) {
+		CurrentMenu = 20;
 		WordDAO wd = new WordDAOImpl();
 		UserWordDAO uwd = new UserWordDAOImpl();
-		System.out.println("단어 시험을 시작합니다. ");
-		System.out.println("1. 랜덤 단어 시험 ");
-		int menu = Integer.parseInt(sc.nextLine());
-		switch (menu) {
-		case 1:
-			System.out.println("======= 랜덤 단어 시험을 시작합니다 =====");
-			try {
-				if (userNo != 0) {
-					EndView.userWordTest(uwd.selectMemberWord(userNo));
-				}
-				 EndView.wordTest(wd.wordSelect(), userNo);
-
-			} catch (SQLException e) {
-				e.printStackTrace();
+		GUIMainView.setConsoleField("======= 단어 시험을 시작합니다 =====\n\n____________________________________________________________________________________\n\n");
+		try {
+			if (userNo != 0) {
+				GUIMainView.userWordTest(uwd.selectMemberWord(userNo));
 			}
+			GUIMainView.wordTest(wd.wordSelect(), userNo);
 
-			return;
-
-		default:
-			System.out.println("잘못된 입력입니다.");
-			break;
-
-		}
-	}
-
-	/**
-	 * 회원가입
-	 */
-	public static void register() {
-		System.out.println("가입하시겠습니까? ");
-		System.out.println("1. 네	| 2. 아니요 ");
-
-		int menu = Integer.parseInt(sc.nextLine());
-		switch (menu) {
-		case 1:
-			System.out.println("가입할 아이디 : ");
-			String userId = sc.nextLine();
-
-			System.out.print("비번 : ");
-			String password = sc.nextLine();
-
-			System.out.print("닉네임 : ");
-			String nickName = sc.nextLine();
-
-			MemberController.register(userId, password, nickName);
-			return;
-
-		case 2:
-			System.out.println("비회원 입니다.");
-			MenuView.printNonUserMenu(); // 비회원 전용 메뉴
-			return;
-
-		default:
-			System.out.println("잘못된 입력입니다.");
-			break;
-
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 
-	}
-
-	/**
-	 * 로그인 메뉴
-	 */
-	public static void login() {
-		System.out.print("아이디 : ");
-		String userId = sc.nextLine();
-
-		System.out.print("비번 : ");
-		String password = sc.nextLine();
-
-		MemberController.login(userId, password);
-	}
-
-	/**
-	 * 로그아웃
-	 */
-	public static void logout(String userId) {
-		SessionSet ss = SessionSet.getInstance();
-		Session session = new Session(userId);
-		ss.remove(session);
+		return;
 	}
 
 	/**
 	 * 단어추가
 	 */
 	public static void printInputWord(int userNo) {
-		System.out.print("추가할 단어 레벨");
-		String wordLev = sc.nextLine();
+		GUIMainView.setConsoleField("======= 개인 단어 추가 =====\n\n____________________________________________________________________________________\n\n");
+		GUIMainView.appendConsoleField("단어 레벨");
+		String wordLev = GUIMainView.getInputDialog("추가할 단어 레벨", "L    (Low)\nM  (Medium)\nH   (High)");
+		while (wordLev.length() != 1 || !"LMH".contains(wordLev.toUpperCase())) {
+			GUIMainView.appendConsoleField("L  M  H 중에 입력하세요.");
+			wordLev = GUIMainView.getInputDialog("추가할 단어 레벨", "L    (Low)\nM  (Medium)\nH   (High)");
+		}
 
-		System.out.print("단어(영문) : ");
-		String wordEng = sc.nextLine();
+		GUIMainView.appendConsoleField("\n영단어");
+		String wordEng = GUIMainView.getInputDialog("추가할 영단어", "영단어 입력");
+		while(wordEng.length() == 0 || !wordEng.matches("^[a-zA-Z]*$")) {
+			GUIMainView.appendConsoleField("알파벳만 입력 가능합니다.");
+			wordEng = GUIMainView.getInputDialog("추가할 영단어", "영단어 입력");
+		}
 
-		System.out.print("단어(한글) : ");
-		String wordKor = sc.nextLine();
+		GUIMainView.appendConsoleField("\n한글 뜻");
+		String wordKor = GUIMainView.getInputDialog("추가할 한글 뜻", "한글 뜻 입력");
+		while (wordKor.length() == 0 || wordKor.matches("^[a-zA-Z0-9]*$")) {
+			GUIMainView.appendConsoleField("영문과 숫자는 입력할 수 없습니다");
+			wordKor = GUIMainView.getInputDialog("추가할 한글 뜻", "한글 뜻 입력");
+		}
 
-		System.out.print("품사 : ");
-		String wordPart = sc.nextLine();
+		GUIMainView.appendConsoleField("\n품사");
+		String wordPart = GUIMainView.getInputDialog("품사", "품사 입력");
+		while (wordPart.length() == 0 || !wordPart.matches("^[a-z]*$")) {
+			GUIMainView.appendConsoleField("영어 소문자만 입력 가능합니다");
+			wordPart = GUIMainView.getInputDialog("품사", "품사 입력");
+		}
 
 		UserWord memberWord = new UserWord(userNo, wordLev, wordEng, wordKor, wordPart);
 		UserWordController.wordInsert(memberWord);
@@ -354,8 +223,13 @@ public class MenuView {
 	 * 단어삭제
 	 */
 	public static void printDeleteWord(int userNo) {
-		System.out.print("삭제할 단어(영문) : ");
-		String wordEng = sc.nextLine();
+		GUIMainView.setConsoleField("======= 개인 단어 삭제 =====\n\n____________________________________________________________________________________\n\n");
+		GUIMainView.appendConsoleField("영단어");
+		String wordEng = GUIMainView.getInputDialog("삭제할 영단어", "영단어 입력");
+		while(wordEng.length() == 0 || !wordEng.matches("^[a-zA-Z]*$")) {
+			GUIMainView.appendConsoleField("알파벳만 입력 가능합니다.");
+			wordEng = GUIMainView.getInputDialog("삭제할 영단어", "영단어 입력");
+		}
 
 		UserWord userWord = new UserWord(userNo, wordEng);
 		UserWordController.wordDelete(userWord);

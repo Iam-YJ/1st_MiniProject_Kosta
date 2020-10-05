@@ -1,10 +1,8 @@
  package controller;
 
-import java.util.List;
-
 import dto.UserWord;
+import gui.GUIMainView;
 import service.UserWordService;
-import view.EndView;
 import view.FailView;
 
 public class UserWordController {
@@ -12,7 +10,9 @@ public class UserWordController {
 
 	public static void wordInsert(UserWord userWord) {
 		try {
-			service.wordInsert(userWord);
+			if (service.wordInsert(userWord) > 0) {
+				GUIMainView.appendConsoleField("____________________________________________________________________________________\n\n개인 단어 \"" + userWord.getUserEng() + "\"  /  \"" + userWord.getUserKor() + "\" 가  추가되었습니다.");
+			}
 		} catch (Exception e) {
 			FailView.errorMessage(e.getMessage());
 		}
@@ -20,20 +20,15 @@ public class UserWordController {
 	
 	public static void wordDelete(UserWord userWord) {
 		try {
-			service.wordDelete(userWord);
+			int result = service.wordDelete(userWord);
+			if (result > 0) {
+				GUIMainView.appendConsoleField("____________________________________________________________________________________\n\n개인 단어 \"" + userWord.getUserEng() + "\" 가 " + result + "개 삭제되었습니다.");
+			}
 		} catch (Exception e) {
 			FailView.errorMessage(e.getMessage());
 		}
 	}
-	public static void selectMemberWord(int userNo) {
-		try {
-			List<UserWord> list = service.selectMemberWord(userNo);
-			EndView.printOrderByUserId(list);
-		} catch (Exception e) {
-			FailView.errorMessage(e.getMessage());
-		}
-	}
-	
+
 	public static boolean getAnswer(int wordNo, String answer) {
 		boolean flag = false;
 		try {

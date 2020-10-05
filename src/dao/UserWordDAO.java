@@ -3,7 +3,6 @@ package dao;
 import java.sql.SQLException;
 import java.util.List;
 import dto.UserWord;
-import dto.Word;
 
 public interface UserWordDAO {
 
