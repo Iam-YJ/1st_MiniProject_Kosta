@@ -96,9 +96,9 @@ public class WordService {
 	 */
 	public static boolean wordTest(int wordNo, String answer) throws SQLException {
 		boolean flag = wd.wordTest(wordNo, answer);
-		if (flag == false) {
-			throw new SQLException("오답입니다");
-		}
+//		if (flag == false) {
+//			throw new SQLException("오답입니다");
+//		}
 		return flag;
 	}
 	
@@ -107,9 +107,9 @@ public class WordService {
 	 */
 	public static boolean wordTestByLevel(int wordNo, String wordLevel, String answer) throws SQLException{
 		boolean flag = wd.wordTestByLevel(wordNo, wordLevel, answer);
-		if (flag == false) {
-			throw new SQLException("오답입니다");
-		}
+//		if (flag == false) {
+//		throw new SQLException("오답입니다");
+//	}
 		return flag;
 	}
 	

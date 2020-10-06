@@ -36,6 +36,7 @@ import dto.UserWord;
 import dto.Word;
 import view.MenuView;
 
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.graphics.Point;
@@ -46,9 +47,11 @@ public class GUIMainView {
 	static private final int programHeight = 1000;
 	
 	// Word Test Variables
-	static private int count = 1;
+	static private int count = 0;
 	static private int score = 0;
 	static private int run = 0;
+	static private int life = 0;
+	static private int bonus = 0;
 	static Random rand = new Random();
 
 	static boolean bSecondLayout = false;
@@ -131,7 +134,7 @@ public class GUIMainView {
 		int x = (mainDisplay.getBounds().width - mainShell.getSize().x) / 2;
 		int y = (mainDisplay.getBounds().height - mainShell.getSize().y) / 2;
 		mainShell.setLocation(x, y);
-		
+
 		// Dialog
 		MessageBox dialogInfo = new MessageBox(mainShell, SWT.ICON_QUESTION | SWT.OK);
 		MessageBox dialogQuestion = new MessageBox(mainShell, SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
@@ -345,7 +348,7 @@ public class GUIMainView {
             	            	}
             	            	String text = InputField.getText();
             	            	InputField.setText("");
-            	            	CheckEvent(text);
+            	            	checkEvent(text);
             	            }
             	        }
             	    });
@@ -440,7 +443,7 @@ public class GUIMainView {
 		}
 	}
 
-	private static void CheckEvent(String text) {
+	private static void checkEvent(String text) {
 		if (MenuView.CurrentMenu == 1) { // MenuView.printUserMenu - 일반 유저 메뉴
 			try {
 				int SelectedMenu = Integer.parseInt(text);
@@ -458,30 +461,40 @@ public class GUIMainView {
 						MenuView.wordTest(loginMember.getUserNo());
 						break;
 						
-					case 3: // 단어 추가
+					case 3: // 단어 게임
+						count = 0;
+						score = 0;
+						run = 0;
+						life = 5;
+						bonus = 0;
+						MenuView.CurrentMenu = 21;
+						MenuView.wordGame(loginMember.getUserNo());
+						break;
+	
+					case 4: // 랭킹
+						MenuView.CurrentMenu = 70;
+						MemberController.rank();
+						break;
+						
+					case 5: // 단어 추가
 						MenuView.CurrentMenu = 30;
 						MenuView.printInputWord(loginMember.getUserNo());
 						break;
 						
-					case 4: // 단어 삭제
+					case 6: // 단어 삭제
 						MenuView.CurrentMenu = 40;
 						MenuView.printDeleteWord(loginMember.getUserNo());
 						break;
 						
-					case 5: // 오답 노트
+					case 7: // 오답 노트
 						MenuView.CurrentMenu = 50;
 						WordController.wordSelectByWordNo(loginMember.getUserNo());
 						break;
 						
-					case 6: // 오답 노트 초기화
+					case 8: // 오답 노트 초기화
 						MenuView.CurrentMenu = 60;
 						setConsoleField("===== 오답 노트 초기화 =====");
 						WordController.resetTestNote(loginMember.getUserNo());
-						break;
-	
-					case 7: // 랭킹
-						MenuView.CurrentMenu = 70;
-						MemberController.rank();
 						break;
 		
 					default: appendConsoleField("일치하는 메뉴가 없습니다.");
@@ -566,6 +579,16 @@ public class GUIMainView {
 						run = 0;
 						MenuView.CurrentMenu = 20;
 						MenuView.wordTest(0);
+						break;
+						
+					case 3: // 단어 게임
+						count = 0;
+						score = 0;
+						run = 0;
+						life = 5;
+						bonus = 0;
+						MenuView.CurrentMenu = 21;
+						MenuView.wordGame(0);
 						break;
 		
 					default: appendConsoleField("일치하는 메뉴가 없습니다.");
@@ -694,16 +717,19 @@ public class GUIMainView {
     
     public static String getInputDialog(String title, String desc) {
     	String result = "";
-        final Shell shell = new Shell(mainDisplay, SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL);
+        final Shell shell = new Shell(mainDisplay, SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL | SWT.CENTER);
         shell.setText(title);
 		shell.setLocation(800, 400);
 
         shell.setLayout(new GridLayout(2, true));
+        shell.setLayoutData(new GridData(300, 300));
 
         Label label = new Label(shell, SWT.NULL);
         label.setText(desc);
 
-        final Text text = new Text(shell, SWT.SINGLE | SWT.BORDER);
+        final Text text = new Text(shell, SWT.SINGLE | SWT.BORDER | SWT.CENTER);
+        text.setTextLimit(16);
+        text.setLayoutData(new GridData(200, 30));
         text.addListener(SWT.Traverse, new Listener()
 	    {
 	        @Override
@@ -729,13 +755,12 @@ public class GUIMainView {
     }
 
 	/** 
-	 * 단어 시험(전체 DB 참조)
+	 * 단어 시험 (전체 DB 참조)
 	 * @param list
 	 * @param userNo
 	 */
 	public static void wordTest(List<Word> list, int userNo) {
-		int run1 = 10 - run;
-		List<Integer> orderList = GUIMainView.makeRandom(run1, list.size());
+		List<Integer> orderList = GUIMainView.makeRandom(10-run, list.size());
 
 		for (Integer i : orderList) {
 			GUIMainView.appendConsoleField("문제 " + count + "번");
@@ -761,7 +786,7 @@ public class GUIMainView {
 	}
 
 	/**
-	 * 단어시험 (개인DB 참조)
+	 * 단어 시험 (개인DB 참조)
 	 * @param list
 	 */
 	public static void userWordTest(List<UserWord> list) {
@@ -792,9 +817,89 @@ public class GUIMainView {
 			}
 			count++;
 		}
-
 	}
 
+	/** 
+	 * 단어 게임 (전체 DB 참조)
+	 * @param list
+	 * @param userNo
+	 */
+	public static int wordGame(List<Word> list, int userNo) {
+		List<Integer> orderList = GUIMainView.makeRandom(1, list.size());
+
+		for (Integer i : orderList) {
+			count++;
+			GUIMainView.appendConsoleField("문제 " + count + "번  [라이프 " + life + " / 5]");
+			GUIMainView.appendConsoleField(list.get(i).getWordEng() + "의 뜻은?");
+			System.out.println("[DEBUG] 정답 >> " + list.get(i).getWordKor());
+
+			if (WordController.getAnswer(list.get(i).getWordNo(), getInputDialog("전체 단어 [" + count + "]", list.get(i).getWordEng() + "의 뜻은?"))) {
+				GUIMainView.appendConsoleField("\n정답입니다\n____________________________________________________________________________________\n\n");
+				score++;
+				bonus++;
+				if (bonus >= 5) {
+					bonus = 0;
+					if (life < 5)
+						GUIMainView.appendConsoleField("5문제 라이프 보너스 !\n" + "[라이프 " + ++life + " / 5]\n\n____________________________________________________________________________________\n\n");
+				}
+			} else {
+				life--;
+				if (userNo > 0) MemberController.insertTest(userNo, null, list.get(i).getWordLevel(), score, count - score,
+																		Integer.toString(list.get(i).getWordNo()));
+				GUIMainView.appendConsoleField("\n틀렸습니다\n____________________________________________________________________________________\n\n");
+			}
+			break;
+		}
+		if (life == 0) {
+			if (userNo > 0) {
+				loginMember.setPoints(loginMember.getPoints() + score);
+				MemberController.updatePoint(loginMember.getUserNo(), score);
+				GUIMainView.appendConsoleField("고생하셨습니다.\n총 " + score + " 문제 맞추셨으며 누적 점수는 " + loginMember.getPoints() + " 포인트 입니다");
+			}
+			else GUIMainView.appendConsoleField("고생하셨습니다.\n총 " + score + " 문제 맞추셨습니다");
+		}
+		return life;
+	}
+
+	/**
+	 * 단어 게임 (개인DB 참조)
+	 * @param list
+	 */
+	public static int userWordGame(List<UserWord> list) {
+		if (list.size() < 1) return 0;
+
+		List<Integer> orderList = GUIMainView.makeRandom(1, list.size());
+
+		for (Integer i : orderList) {
+			count++;
+			GUIMainView.appendConsoleField("(개인 단어) 문제 " + count + "번  [라이프 " + life + " / 5]");
+			GUIMainView.appendConsoleField(list.get(i).getUserEng() + "의 뜻은?");
+			System.out.println("[DEBUG] 정답 >> " + list.get(i).getUserKor());
+			
+			if (UserWordController.getAnswer(list.get(i).getUserWordNo(), getInputDialog("개인 단어 [" + count + "]", list.get(i).getUserEng() + "의 뜻은?"))) {
+				GUIMainView.appendConsoleField("\n정답입니다\n____________________________________________________________________________________\n\n");
+				score++;
+				bonus++;
+				if (bonus >= 5) {
+					bonus = 0;
+					if (life < 5)
+						GUIMainView.appendConsoleField("5문제 라이프 보너스 !\n" + "[라이프 " + ++life + " / 5]\n\n____________________________________________________________________________________\n\n");
+				}
+			} else {
+				life--;
+				MemberController.insertTest(list.get(i).getUserNo(), null, list.get(i).getUserLevel(), score,
+						count - score, Integer.toString(list.get(i).getUserWordNo()));
+				GUIMainView.appendConsoleField("\n틀렸습니다\n____________________________________________________________________________________\n\n");
+			}
+			if (life == 0) {
+				loginMember.setPoints(loginMember.getPoints() + score);
+				MemberController.updatePoint(loginMember.getUserNo(), score);
+				GUIMainView.appendConsoleField("고생하셨습니다.\n총 " + score + " 문제 맞추셨으며 누적 점수는 " + loginMember.getPoints() + " 포인트 입니다");
+			}
+			break;
+		}
+		return life;
+	}
 
 	/**
 	 * 단어시험용 랜덤 10개 뽑기

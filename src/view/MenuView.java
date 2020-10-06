@@ -1,6 +1,7 @@
 package view;
 
 import java.sql.SQLException;
+import java.util.Random;
 
 import controller.MemberController;
 import controller.UserWordController;
@@ -21,21 +22,21 @@ public class MenuView {
 	public static void printUserMenu(String userId, int userNo) { // 회원 메뉴
 		CurrentMenu = 1;
 		SessionSet ss = SessionSet.getInstance();
-		GUIMainView.setConsoleField("-----" + userId + " 로그인 중 -----");
-		GUIMainView.appendConsoleField("1. 단어 검색  |  2. 단어 시험  | 3. 개인 단어 추가  |  4. 개인 단어 삭제  |  5. 오답 노트  |  6. 오답 노트 초기화  |  7. 랭킹");
+		GUIMainView.setConsoleField("-----" + userId + " 로그인 중 -----\n\n");
+		GUIMainView.appendConsoleField("1. 단어 검색  |  2. 단어 시험  |  3. 단어 게임 |  4. 랭킹/회원 목록\n\n____________________________________________________________________________________\n\n5. 개인 단어 추가  |  6. 개인 단어 삭제\n\n____________________________________________________________________________________\n\n7. 오답 노트  |  8. 오답 노트 초기화 ");
 	}
 
 	public static void printNonUserMenu() { // 비회원 메뉴
 		CurrentMenu = 80;
 		SessionSet ss = SessionSet.getInstance();
-		GUIMainView.setConsoleField("----- Guest 로그인 중 -----");
-		GUIMainView.appendConsoleField(" 1. 단어 검색  |  2.단어 시험");
+		GUIMainView.setConsoleField("----- Guest 로그인 중 -----\n\n");
+		GUIMainView.appendConsoleField(" 1. 단어 검색  |  2. 단어 시험  |  3. 단어 게임");
 	}
 
 	public static void printAdminMenu() { // 관리자 메뉴
 		CurrentMenu = 90;
 			SessionSet ss = SessionSet.getInstance();
-			GUIMainView.setConsoleField("----- Administrator 로그인 중 -----");
+			GUIMainView.setConsoleField("----- Administrator 로그인 중 -----\n\n");
 			GUIMainView.appendConsoleField("1. 단어 추가  |  2. 단어 삭제  |  3. 회원 목록  |  4. 회원 수정  |  5. 회원 삭제");
 	}
 
@@ -150,7 +151,7 @@ public class MenuView {
 	 */
 	public static void printAllWord() {
 		GUIMainView.setConsoleField("어떤 방식으로 단어를 검색할까요? ");
-		GUIMainView.appendConsoleField("1. 전체 검색 | 2. 단어 검색 | 3. 알파벳 검색 | 4. 한글 검색 | 5. 개인 단어 검색");
+		GUIMainView.appendConsoleField("1. 전체 검색  |  2. 단어 검색  |  3. 알파벳 검색  |  4. 한글 검색  |  5. 개인 단어 검색");
 	}
 
 	/**
@@ -158,14 +159,13 @@ public class MenuView {
 	 */
 	public static void printAllWordGuest() {
 		GUIMainView.setConsoleField("어떤 방식으로 단어를 검색할까요? ");
-		GUIMainView.appendConsoleField("1. 전체 검색 | 2. 단어 검색 | 3. 알파벳 검색 | 4. 한글 검색");
+		GUIMainView.appendConsoleField("1. 전체 검색  |  2. 단어 검색  |  3. 알파벳 검색  |  4. 한글 검색");
 	}
 
 	/**
-	 * 단어 시험 & 게임
+	 * 단어 시험
 	 */
 	public static void wordTest(int userNo) {
-		CurrentMenu = 20;
 		WordDAO wd = new WordDAOImpl();
 		UserWordDAO uwd = new UserWordDAOImpl();
 		GUIMainView.setConsoleField("======= 단어 시험을 시작합니다 =====\n\n____________________________________________________________________________________\n\n");
@@ -175,6 +175,34 @@ public class MenuView {
 			}
 			GUIMainView.wordTest(wd.wordSelect(), userNo);
 
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return;
+	}
+
+	/**
+	 * 단어 게임
+	 */
+	public static void wordGame(int userNo) {
+		WordDAO wd = new WordDAOImpl();
+		UserWordDAO uwd = new UserWordDAOImpl();
+		GUIMainView.setConsoleField("======= 단어 게임을 시작합니다 =====\n\n____________________________________________________________________________________\n\n");
+		try {
+			int life = 5;
+			int userWordCount = 0;
+			if (userNo != 0) {
+				userWordCount = uwd.selectMemberWord(userNo).size();
+			}
+			Random rand = new Random();
+			while (life > 0){
+				if (userNo != 0 && userWordCount > 0 && rand.nextInt(3) == 0) {
+					life = GUIMainView.userWordGame(uwd.selectMemberWord(userNo));
+					userWordCount--;
+				}
+				else life = GUIMainView.wordGame(wd.wordSelect(), userNo);
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
