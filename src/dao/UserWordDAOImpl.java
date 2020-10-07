@@ -73,8 +73,8 @@ public class UserWordDAOImpl implements UserWordDAO {
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
-				userWord = new UserWord(rs.getInt(1), rs.getInt(6), rs.getString(2), rs.getString(3), rs.getString(4),
-						rs.getString(5));
+				userWord = new UserWord(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getString(5),
+						rs.getString(6));
 				list.add(userWord);
 			}
 
